@@ -4,7 +4,7 @@
  * Plugin Name: Image Optimizer
  * Description: Optimize images on upload and create webp versions.
  * Version: 1.0
- * Author: Your Name
+ * Author: Vontainment
  */
 
 if (!defined('ABSPATH')) {
