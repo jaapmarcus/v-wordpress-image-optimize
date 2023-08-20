@@ -26,11 +26,13 @@ if (defined('VWPIMGOP') && VWPIMGOP === true) {
 function optimize_uploaded_image($metadata, $attachment_id)
 {
 	$file = get_attached_file($attachment_id); // Original Image
-	optimize_image($file); // Optimize Original Image
-	foreach ($metadata['sizes'] as $size => $value) {
-		$upload_folder = wp_upload_dir();
-		$image = image_get_intermediate_size($attachment_id, $size);
-		optimize_image(path_join($upload_folder['basedir'], $image['path'])); // Optimize resized images
+	if(file_is_valid_image($file)){
+		optimize_image($file); // Optimize Original Image
+		foreach ($metadata['sizes'] as $size => $value) {
+			$upload_folder = wp_upload_dir();
+			$image = image_get_intermediate_size($attachment_id, $size);
+			optimize_image(path_join($upload_folder['basedir'], $image['path'])); // Optimize resized images
+		}
 	}
 	return $metadata; // Return metadata for database update
 }
@@ -107,16 +109,18 @@ function delete_webp_image($post_id)
 	}
 
 	// Check and delete webp files for all image sizes
-	foreach ($metadata['sizes'] as $size => $value) {
-		$upload_folder = wp_upload_dir();
-		$image = image_get_intermediate_size($post_id, $size);
-		$file = path_join($upload_folder['basedir'], $image['path']);
-
-		$webp_file = "{$file}.webp";
-
-		if (file_exists($webp_file)) {
-			if (!unlink($webp_file)) {
-				error_log("Failed to delete WebP file '{$webp_file}'.");
+	if(!empty($metadata['sizes'])){
+		foreach ($metadata['sizes'] as $size => $value) {
+			$upload_folder = wp_upload_dir();
+			$image = image_get_intermediate_size($post_id, $size);
+			$file = path_join($upload_folder['basedir'], $image['path']);
+	
+			$webp_file = "{$file}.webp";
+	
+			if (file_exists($webp_file)) {
+				if (!unlink($webp_file)) {
+					error_log("Failed to delete WebP file '{$webp_file}'.");
+				}
 			}
 		}
 	}
